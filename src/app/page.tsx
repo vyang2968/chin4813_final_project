@@ -26,6 +26,37 @@ export default function Home() {
         if (index !== -1) setCurrentStageIndex(index);
     };
 
+    // Scroll Listener for stage transitions
+    const lastScrollTimeRef = useRef(0);
+
+    useEffect(() => {
+        const handleWheel = (e: WheelEvent) => {
+            const target = e.target as HTMLElement;
+            const isOnOverlay = target.closest('[data-overlay="true"]'); // safer
+
+            if (isOnOverlay) return;
+
+            const now = Date.now();
+            if (now - lastScrollTimeRef.current < 1000) return;
+
+            if (e.deltaY > 20) {
+                if (currentStageIndex < STAGE_ORDER.length - 1) {
+                    setCurrentStageIndex(prev => prev + 1);
+                    lastScrollTimeRef.current = now;
+                }
+            } else if (e.deltaY < -20) {
+                if (currentStageIndex > 1) {
+                    setCurrentStageIndex(prev => prev - 1);
+                    lastScrollTimeRef.current = now;
+                }
+            }
+        };
+
+        window.addEventListener('wheel', handleWheel, { passive: true });
+        return () => window.removeEventListener('wheel', handleWheel);
+    }, [currentStageIndex]);
+
+
     return (
         <main>
             <TableScene>
