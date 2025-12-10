@@ -20,44 +20,11 @@ export default function Home() {
 
     const currentStage = STAGE_ORDER[currentStageIndex];
     const currentDish = DISHES[currentStage];
-    const containerRef = useRef<HTMLDivElement>(null);
 
     const handleNavigate = (stage: Stage) => {
         const index = STAGE_ORDER.indexOf(stage);
         if (index !== -1) setCurrentStageIndex(index);
     };
-
-    // Scroll Listener for "Scrollytelling"
-    // We want to detect scroll events and trigger stage changes
-    // A simple way is to listen to wheel events with a cooldown to prevent rapid skipping
-    useEffect(() => {
-        let lastScrollTime = 0;
-        const cooldown = 1000; // 1 second between transitions
-
-        const handleWheel = (e: WheelEvent) => {
-            const now = Date.now();
-            if (now - lastScrollTime < cooldown) return;
-
-            if (e.deltaY > 50) {
-                // Scroll Down -> Next
-                // DISABLE SCROLL on 'menu' stage (index 0)
-                if (currentStageIndex !== 0 && currentStageIndex < STAGE_ORDER.length - 1) {
-                    setCurrentStageIndex(prev => prev + 1);
-                    lastScrollTime = now;
-                }
-            } else if (e.deltaY < -50) {
-                // Scroll Up -> Prev
-                if (currentStageIndex > 1) { // Don't scroll back to menu from Intro easily via scroll? Or allow it? Allowing it.
-                    setCurrentStageIndex(prev => prev - 1);
-                    lastScrollTime = now;
-                }
-            }
-        };
-
-        window.addEventListener('wheel', handleWheel);
-        return () => window.removeEventListener('wheel', handleWheel);
-    }, [currentStageIndex]);
-
 
     return (
         <main>
@@ -135,7 +102,7 @@ export default function Home() {
                             layout
                             style={{
                                 position: "absolute",
-                                top: "50%",
+                                top: "52%",
                                 left: isFocused ? "35%" : "35%", // stays left
                                 translate: "-50% -50%",
                                 zIndex: 5,
@@ -156,14 +123,6 @@ export default function Home() {
                 )}
 
             </TableScene>
-
-            {/* Scroll indicator/hint */}
-            {currentStage !== 'menu' && currentStage !== 'closing' && (
-                <Box sx={{ position: 'fixed', bottom: 20, right: 20, color: 'white', zIndex: 50, opacity: 0.7 }}>
-                    <Typography variant="body2">Scroll to continue ▼</Typography>
-                </Box>
-            )}
-
         </main>
     );
 }

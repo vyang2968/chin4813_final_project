@@ -42,14 +42,14 @@ export default function InfoSheet({ title, content, isVisible }: InfoSheetProps)
       )}
 
       <motion.div
-        initial={{ x: '100vw', opacity: 0 }}
+        initial={{ x: '-100vw', opacity: 0 }}
         animate={
           isVisible
             ? { x: "12vw", y: "-2vw", opacity: 1 }
             : { x: '100vw', opacity: 0 }
         }
         exit={{ x: '100vw', opacity: 0 }}
-        transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 1.0 }}
+        transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 1.5 }}
         style={{
           position: isFocused ? 'fixed' : 'relative',
           top: isFocused ? '10%' : 'auto',
