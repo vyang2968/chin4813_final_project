@@ -21,13 +21,39 @@ export default function Home() {
 
     const currentStage = STAGE_ORDER[currentStageIndex];
     const currentDish = DISHES[currentStage];
+    const [courseNumber, setCourseNumber] = useState(1);
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
-    // Show course title briefly when entering intro stage
+    // Show course title briefly when entering a course stage
     useEffect(() => {
-        if (currentStage === 'intro') {
-            setShowCourseTitle(true);
-            const timer = setTimeout(() => setShowCourseTitle(false), 2000); // Show for 2 seconds
-            return () => clearTimeout(timer);
+        const courseStages = ['course1', 'course2', 'course3', 'course4']; // Removed 'intro' to avoid duplicate Course 1
+        if (courseStages.includes(currentStage)) {
+            // Lock scrolling during transition
+            setIsTransitioning(true);
+
+            // Determine course number
+            let num = 1;
+            if (currentStage === 'course2') num = 2;
+            else if (currentStage === 'course3') num = 3;
+            else if (currentStage === 'course4') num = 4;
+
+            setCourseNumber(num);
+
+            // Delay showing title to let plates slide out first (0.5s exit animation)
+            const showTimer = setTimeout(() => {
+                setShowCourseTitle(true);
+                // Hide after 1 second
+                const hideTimer = setTimeout(() => setShowCourseTitle(false), 1000);
+                return () => clearTimeout(hideTimer);
+            }, 500);
+
+            // Unlock scrolling after full transition (exit 0.5s + title delay 0.5s + title show 1s + entry 0.5s = 2.5s)
+            const unlockTimer = setTimeout(() => setIsTransitioning(false), 2500);
+
+            return () => {
+                clearTimeout(showTimer);
+                clearTimeout(unlockTimer);
+            };
         }
     }, [currentStage]);
 
@@ -46,15 +72,18 @@ export default function Home() {
 
             if (isOnOverlay) return;
 
+            // Prevent scrolling during transitions
+            if (isTransitioning) return;
+
             const now = Date.now();
             if (now - lastScrollTimeRef.current < 1000) return;
 
-            if (e.deltaY > 20) {
+            if (e.deltaY > 15) {
                 if (currentStageIndex < STAGE_ORDER.length - 1) {
                     setCurrentStageIndex(prev => prev + 1);
                     lastScrollTimeRef.current = now;
                 }
-            } else if (e.deltaY < -20) {
+            } else if (e.deltaY < -15) {
                 if (currentStageIndex > 1) {
                     setCurrentStageIndex(prev => prev - 1);
                     lastScrollTimeRef.current = now;
@@ -161,7 +190,7 @@ export default function Home() {
                                     letterSpacing: '0.1em',
                                 }}
                             >
-                                Course 1
+                                Course {courseNumber}
                             </Typography>
                         </motion.div>
                     )}
@@ -169,32 +198,36 @@ export default function Home() {
 
                 {/* Course View: Plate & InfoSheet */}
                 {/* Visible for Intro, Course 1-4, Closing */}
-                {currentStage !== 'menu' && (
-                    <LayoutGroup>
-                        {/* Plate */}
-                        <motion.div
-                            layout
-                            style={{
-                                position: "absolute",
-                                top: "52%",
-                                left: isFocused ? "35%" : "35%", // stays left
-                                translate: "-50% -50%",
-                                zIndex: 5,
-                                width: "min(45vw, 500px)",
-                                height: "min(45vw, 500px)"
-                            }}
-                        >
-                            <Plate dishImage={currentStage === 'intro' ? DISHES.course1?.image : (currentDish?.image || null)} />
-                        </motion.div>
+                <AnimatePresence mode="wait">
+                    {currentStage !== 'menu' && (
+                        <React.Fragment key={currentStage}>
+                            {/* Plate */}
+                            <motion.div
+                                initial={{ x: '-100vw', opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                                exit={{ x: '-100vw', opacity: 0 }}
+                                transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 0.3 }}
+                                style={{
+                                    position: "absolute",
+                                    top: "25%",
+                                    left: "20%",
+                                    zIndex: 5,
+                                    width: "min(45vw, 500px)",
+                                    height: "min(45vw, 500px)"
+                                }}
+                            >
+                                <Plate dishImage={currentStage === 'intro' ? DISHES.course1?.image : (currentDish?.image || null)} />
+                            </motion.div>
 
-                        {/* InfoSheet */}
-                        <InfoSheet
-                            title={currentStage === 'intro' ? 'Introduction' : (currentStage === 'closing' ? 'Closing' : currentDish?.name || '')}
-                            content={currentStage === 'intro' ? 'Scroll down to begin the first course.' : (currentStage === 'closing' ? CLOSING_TEXT : currentDish?.info || '')}
-                            isVisible={true}
-                        />
-                    </LayoutGroup>
-                )}
+                            {/* InfoSheet */}
+                            <InfoSheet
+                                title={currentStage === 'intro' ? 'Introduction' : (currentStage === 'closing' ? 'Closing' : currentDish?.name || '')}
+                                content={currentStage === 'intro' ? 'Scroll down to begin the first course.' : (currentStage === 'closing' ? CLOSING_TEXT : currentDish?.info || '')}
+                                isVisible={true}
+                            />
+                        </React.Fragment>
+                    )}
+                </AnimatePresence>
 
             </TableScene>
         </main>
