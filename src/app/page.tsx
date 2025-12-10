@@ -141,7 +141,7 @@ export default function Home() {
                                 height: "min(45vw, 500px)"
                             }}
                         >
-                            <Plate dishImage={currentDish?.image || null} />
+                            <Plate dishImage={currentStage === 'intro' ? DISHES.course1?.image : (currentDish?.image || null)} />
                         </motion.div>
 
                         {/* InfoSheet */}
