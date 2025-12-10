@@ -49,7 +49,7 @@ export default function InfoSheet({ title, content, isVisible }: InfoSheetProps)
             : { x: '100vw', opacity: 0 }
         }
         exit={{ x: '100vw', opacity: 0 }}
-        transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 1.5 }}
+        transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 3.5 }}
         style={{
           position: isFocused ? 'fixed' : 'relative',
           top: isFocused ? '10%' : 'auto',

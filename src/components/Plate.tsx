@@ -15,7 +15,7 @@ export default function Plate({ dishImage, sx }: PlateProps) {
       initial={{ x: '-100vw', opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: '-100vw', opacity: 0 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 1.0 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 2.5 }}
       style={{
           position: 'relative',
           display: 'flex',

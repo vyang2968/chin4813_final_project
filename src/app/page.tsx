@@ -17,9 +17,19 @@ const STAGE_ORDER: Stage[] = ['menu', 'intro', 'course1', 'course2', 'course3', 
 export default function Home() {
     const [currentStageIndex, setCurrentStageIndex] = useState(0);
     const [isFocused, setIsFocused] = useState(false);
+    const [showCourseTitle, setShowCourseTitle] = useState(false);
 
     const currentStage = STAGE_ORDER[currentStageIndex];
     const currentDish = DISHES[currentStage];
+
+    // Show course title briefly when entering intro stage
+    useEffect(() => {
+        if (currentStage === 'intro') {
+            setShowCourseTitle(true);
+            const timer = setTimeout(() => setShowCourseTitle(false), 2000); // Show for 2 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [currentStage]);
 
     const handleNavigate = (stage: Stage) => {
         const index = STAGE_ORDER.indexOf(stage);
@@ -120,6 +130,39 @@ export default function Home() {
                                     Begin Dinner
                                 </Button>
                             </Box>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Course Title - shown briefly when transitioning to intro */}
+                <AnimatePresence>
+                    {showCourseTitle && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.5 }}
+                            style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '40%',
+                                transform: 'translateX(-50%) translateY(-50%)',
+                                zIndex: 50,
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            <Typography
+                                variant="h2"
+                                sx={{
+                                    fontFamily: 'serif',
+                                    color: '#ffffff',
+                                    fontWeight: 'bold',
+                                    textShadow: '0px 4px 20px rgba(0,0,0,0.8)',
+                                    letterSpacing: '0.1em',
+                                }}
+                            >
+                                Course 1
+                            </Typography>
                         </motion.div>
                     )}
                 </AnimatePresence>
