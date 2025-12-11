@@ -8,9 +8,10 @@ interface InfoSheetProps {
   title: string;
   content: string;
   isVisible: boolean;
+  isIntro?: boolean;
 }
 
-export default function InfoSheet({ title, content, isVisible }: InfoSheetProps) {
+export default function InfoSheet({ title, content, isVisible, isIntro = false }: InfoSheetProps) {
   const [isFocused, setIsFocused] = useState(false);
 
   // If not visible, reset focus state
@@ -48,8 +49,12 @@ export default function InfoSheet({ title, content, isVisible }: InfoSheetProps)
             ? { x: "12vw", y: "0", opacity: 1 }
             : { x: '100vw', opacity: 0 }
         }
-        exit={{ x: '100vw', opacity: 0 }}
-        transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 0.3 }}
+        exit={{
+          x: '100vw',
+          opacity: 0,
+          transition: { duration: 0.8, delay: 0 } // Immediate exit
+        }}
+        transition={{ type: 'spring', damping: 20, stiffness: 60, delay: isIntro ? 3.4 : 2.3 }}
         style={{
           position: isFocused ? 'fixed' : 'relative',
           top: isFocused ? '10%' : 'auto',

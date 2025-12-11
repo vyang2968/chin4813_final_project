@@ -12,7 +12,7 @@ import InfoSheet from '@/components/InfoSheet';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 
 // Define the order of stages
-const STAGE_ORDER: Stage[] = ['menu', 'intro', 'course1', 'course2', 'course3', 'course4', 'closing'];
+const STAGE_ORDER: Stage[] = ['menu', 'intro', 'course2', 'course3', 'course4', 'closing'];
 
 export default function Home() {
     const [currentStageIndex, setCurrentStageIndex] = useState(0);
@@ -26,29 +26,36 @@ export default function Home() {
 
     // Show course title briefly when entering a course stage
     useEffect(() => {
-        const courseStages = ['course1', 'course2', 'course3', 'course4']; // Removed 'intro' to avoid duplicate Course 1
+        const courseStages = ['intro', 'course2', 'course3', 'course4'];
         if (courseStages.includes(currentStage)) {
             // Lock scrolling during transition
             setIsTransitioning(true);
 
             // Determine course number
             let num = 1;
-            if (currentStage === 'course2') num = 2;
+            if (currentStage === 'intro') num = 1;
+            else if (currentStage === 'course2') num = 2;
             else if (currentStage === 'course3') num = 3;
             else if (currentStage === 'course4') num = 4;
 
             setCourseNumber(num);
 
-            // Delay showing title to let plates slide out first (0.5s exit animation)
+            // Special timing for intro (first course) vs other courses
+            const isIntro = currentStage === 'intro';
+            const titleDelay = isIntro ? 500 : 1000; // Wait for exit (800ms) + gap (200ms)
+            const titleDisplayDuration = 2000; // Show title for longer
+            const totalTransitionTime = isIntro ? 5500 : 4000; // Intro needs more time, others need less
+
+            // Delay showing title
             const showTimer = setTimeout(() => {
                 setShowCourseTitle(true);
-                // Hide after 1 second
-                const hideTimer = setTimeout(() => setShowCourseTitle(false), 1000);
+                // Hide after duration
+                const hideTimer = setTimeout(() => setShowCourseTitle(false), titleDisplayDuration);
                 return () => clearTimeout(hideTimer);
-            }, 500);
+            }, titleDelay);
 
-            // Unlock scrolling after full transition (exit 0.5s + title delay 0.5s + title show 1s + entry 0.5s = 2.5s)
-            const unlockTimer = setTimeout(() => setIsTransitioning(false), 2500);
+            // Unlock scrolling after full transition
+            const unlockTimer = setTimeout(() => setIsTransitioning(false), totalTransitionTime);
 
             return () => {
                 clearTimeout(showTimer);
@@ -205,8 +212,12 @@ export default function Home() {
                             <motion.div
                                 initial={{ x: '-100vw', opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
-                                exit={{ x: '-100vw', opacity: 0 }}
-                                transition={{ type: 'spring', damping: 20, stiffness: 60, delay: 0.3 }}
+                                exit={{
+                                    x: '-100vw',
+                                    opacity: 0,
+                                    transition: { duration: 0.8, delay: 0 } // Immediate exit
+                                }}
+                                transition={{ type: 'spring', damping: 20, stiffness: 60, delay: currentStage === 'intro' ? 3.6 : 2.5 }}
                                 style={{
                                     position: "absolute",
                                     top: "25%",
@@ -224,6 +235,7 @@ export default function Home() {
                                 title={currentStage === 'intro' ? 'Introduction' : (currentStage === 'closing' ? 'Closing' : currentDish?.name || '')}
                                 content={currentStage === 'intro' ? 'Scroll down to begin the first course.' : (currentStage === 'closing' ? CLOSING_TEXT : currentDish?.info || '')}
                                 isVisible={true}
+                                isIntro={currentStage === 'intro'}
                             />
                         </React.Fragment>
                     )}
