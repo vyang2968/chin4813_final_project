@@ -20,16 +20,47 @@ export default function Home() {
     const [showCourseTitle, setShowCourseTitle] = useState(false);
     const [showScrollIndicator, setShowScrollIndicator] = useState(true);
     const [showGradient, setShowGradient] = useState(true);
+    const [showIdleIndicator, setShowIdleIndicator] = useState(false);
 
     const currentStage = STAGE_ORDER[currentStageIndex];
     const currentDish = DISHES[currentStage];
     const [courseNumber, setCourseNumber] = useState(1);
     const [isTransitioning, setIsTransitioning] = useState(false);
 
+    // Refs for scrolling and idle tracking
+    const lastScrollTimeRef = useRef(Date.now());
+    const lastInteractionRef = useRef(Date.now());
+
+    // Idle Timer Logic
+    useEffect(() => {
+        const checkIdle = () => {
+            // Only run check on course stages
+            const courseStages = ['intro', 'course2', 'course3', 'course4'];
+            if (!courseStages.includes(currentStage)) {
+                if (showIdleIndicator) setShowIdleIndicator(false);
+                return;
+            }
+
+            const now = Date.now();
+            const timeSinceLastInteraction = now - lastInteractionRef.current;
+            if (timeSinceLastInteraction > 60000) { // 1 minute
+                setShowIdleIndicator(true);
+            }
+        };
+
+        const intervalId = setInterval(checkIdle, 1000);
+        return () => clearInterval(intervalId);
+    }, [currentStage, showIdleIndicator]);
+
     // Show course title briefly when entering a course stage
     useEffect(() => {
         const courseStages = ['intro', 'course2', 'course3', 'course4'];
         if (courseStages.includes(currentStage)) {
+            // Reset idle indicator on stage change
+            setShowIdleIndicator(false);
+            lastInteractionRef.current = Date.now();
+            lastScrollTimeRef.current = Date.now();
+
             // Lock scrolling during transition
             setIsTransitioning(true);
 
@@ -71,11 +102,12 @@ export default function Home() {
         if (index !== -1) setCurrentStageIndex(index);
     };
 
-    // Scroll Listener for stage transitions
-    const lastScrollTimeRef = useRef(0);
-
     useEffect(() => {
         const handleWheel = (e: WheelEvent) => {
+            // Reset idle timer on any interaction
+            lastInteractionRef.current = Date.now();
+            setShowIdleIndicator(false);
+
             const target = e.target as HTMLElement;
             const isOnOverlay = target.closest('[data-overlay="true"]'); // safer
 
@@ -88,6 +120,7 @@ export default function Home() {
             if (isTransitioning) return;
 
             const now = Date.now();
+            // Scroll throttling logic
             if (now - lastScrollTimeRef.current < 1000) return;
 
             if (e.deltaY > 15) {
@@ -105,12 +138,43 @@ export default function Home() {
 
         window.addEventListener('wheel', handleWheel, { passive: true });
         return () => window.removeEventListener('wheel', handleWheel);
-    }, [currentStageIndex]);
+    }, [currentStageIndex, isTransitioning, currentStage]); // Added dependencies
 
 
     return (
         <main>
             <TableScene>
+                {/* Global Idle Indicator */}
+                <AnimatePresence>
+                    {showIdleIndicator && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1, y: [0, 10, 0] }}
+                            exit={{ opacity: 0 }}
+                            transition={{
+                                opacity: { duration: 0.5 },
+                                y: { repeat: Infinity, duration: 2, ease: "easeInOut" }
+                            }}
+                            style={{
+                                position: 'fixed',
+                                bottom: '5vh',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                zIndex: 100,
+                                pointerEvents: 'none',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <Typography variant="caption" sx={{ color: '#fff', mb: 1, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                                Scroll to continue
+                            </Typography>
+                            <KeyboardArrowDown sx={{ fontSize: 40, color: '#fff', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 <AnimatePresence mode="wait">
                     {currentStage === 'menu' && (
                         <motion.div

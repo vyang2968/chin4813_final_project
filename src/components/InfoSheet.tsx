@@ -14,16 +14,35 @@ export default function InfoSheet({ title, content, isVisible, isIntro = false }
   const [isFocused, setIsFocused] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isStable, setIsStable] = useState(false);
+  const [isPulsing, setIsPulsing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Timer for Pulse Animation
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isVisible && !isFocused) {
+      // Start timer to pulse after 15 seconds
+      timer = setTimeout(() => {
+        setIsPulsing(true);
+      }, 15000);
+    } else {
+      // Reset if not visible or if focused
+      setIsPulsing(false);
+    }
+
+    return () => clearTimeout(timer);
+  }, [isVisible, isFocused]);
+
 
   // If not visible, reset focus state and stability
   React.useEffect(() => {
     if (!isVisible) {
       setIsFocused(false);
       setIsStable(false);
+      setIsPulsing(false);
     }
   }, [isVisible]);
 
@@ -59,6 +78,8 @@ export default function InfoSheet({ title, content, isVisible, isIntro = false }
         {!isFocused && (
           <motion.div
             layoutId={isStable ? `sheet-${title}` : undefined} // Only attach layoutId when stable to prevent entry bounce
+            animate={isPulsing ? { scale: [1, 1.05, 1], filter: ['brightness(1)', 'brightness(1.1)', 'brightness(1)'] } : {}}
+            transition={isPulsing ? { repeat: Infinity, duration: 2.0, ease: "easeInOut" } : {}}
             onClick={() => isStable && setIsFocused(true)}
           >
             <Paper
