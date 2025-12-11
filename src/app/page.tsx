@@ -8,6 +8,7 @@ import { Stage } from '@/types';
 import { Box, Button, Typography } from '@mui/material';
 import Plate from '@/components/Plate';
 import InfoSheet from '@/components/InfoSheet';
+import { KeyboardArrowDown } from '@mui/icons-material';
 
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 
@@ -16,8 +17,9 @@ const STAGE_ORDER: Stage[] = ['menu', 'intro', 'course2', 'course3', 'course4', 
 
 export default function Home() {
     const [currentStageIndex, setCurrentStageIndex] = useState(0);
-    const [isFocused, setIsFocused] = useState(false);
     const [showCourseTitle, setShowCourseTitle] = useState(false);
+    const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+    const [showGradient, setShowGradient] = useState(true);
 
     const currentStage = STAGE_ORDER[currentStageIndex];
     const currentDish = DISHES[currentStage];
@@ -79,6 +81,9 @@ export default function Home() {
 
             if (isOnOverlay) return;
 
+            // Disable scroll navigation on the intro (menu) stage
+            if (currentStage === 'menu') return;
+
             // Prevent scrolling during transitions
             if (isTransitioning) return;
 
@@ -130,25 +135,99 @@ export default function Home() {
                                     position: 'absolute',
                                     top: '15vh',
                                     width: 'min(90vw, 600px)',
-                                    bottom: '-10vh',
+                                    bottom: '-10vh', // Extends off-screen as requested
                                     backgroundColor: '#e6ccb2',
                                     boxShadow: '0px 4px 20px rgba(0,0,0,0.3)',
                                     transform: 'rotate(0deg)',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
                                     padding: 4,
-                                    textAlign: 'center',
-                                    pointerEvents: 'auto'
+                                    textAlign: 'left',
+                                    pointerEvents: 'auto',
                                 }}
                             >
-                                <Typography variant="h3" gutterBottom sx={{ fontFamily: 'serif', color: '#5d4037', fontWeight: 'bold' }}>
-                                    A Culinary Journey
+                                <Typography variant="h4" gutterBottom sx={{ fontFamily: 'serif', color: '#5d4037', fontWeight: 'bold' }}>
+                                    Food During the Mao Era
                                 </Typography>
-                                <Typography variant="h6" sx={{ fontFamily: 'serif', color: '#5d4037', mb: 4, maxWidth: '80%' }}>
-                                    {INTRO_TEXT}
-                                </Typography>
+                                <Box sx={{ position: 'relative', width: '100%', height: '60vh' }}>
+                                    <div
+                                        style={{
+                                            overflowY: 'auto',
+                                            width: '100%',
+                                            height: '100%',
+                                        }}
+                                        data-overlay="true"
+                                        onScroll={(e) => {
+                                            const element = e.currentTarget;
+
+                                            // Arrow logic
+                                            if (element.scrollTop > 10) {
+                                                setShowScrollIndicator(false);
+                                            } else {
+                                                setShowScrollIndicator(true);
+                                            }
+
+                                            // Gradient logic: Hide if at bottom
+                                            const isAtBottom = Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 5;
+                                            setShowGradient(!isAtBottom);
+                                        }}
+                                    >
+                                        <Typography component="div" variant="body1" sx={{ fontFamily: 'serif', color: '#5d4037', px: 4, maxWidth: '100%', textAlign: 'left' }}>
+                                            {INTRO_TEXT}
+                                        </Typography>
+                                    </div>
+
+                                    {/* Scroll Indicator */}
+                                    <AnimatePresence>
+                                        {showScrollIndicator && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1, y: [0, 10, 0] }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{
+                                                    opacity: { duration: 0.3 },
+                                                    y: {
+                                                        repeat: Infinity,
+                                                        duration: 1.5,
+                                                        ease: "easeInOut"
+                                                    }
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    bottom: '20px',
+                                                    left: '46%',
+                                                    pointerEvents: 'none',
+                                                    zIndex: 20
+                                                }}
+                                            >
+                                                <KeyboardArrowDown sx={{ fontSize: 40, color: '#5d4037' }} />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Gradient Mask at bottom */}
+                                    <AnimatePresence>
+                                        {showGradient && (
+                                            <motion.div
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: '60px',
+                                                    background: 'linear-gradient(to bottom, transparent, #e6ccb2)',
+                                                    pointerEvents: 'none',
+                                                    zIndex: 15
+                                                }}
+                                            />
+                                        )}
+                                    </AnimatePresence>
+                                </Box>
 
                                 <Button
                                     variant="contained"
@@ -159,6 +238,7 @@ export default function Home() {
                                         padding: '12px 36px',
                                         fontSize: '1.2rem',
                                         fontFamily: 'serif',
+                                        marginTop: '4vh',
                                         '&:hover': { backgroundColor: '#795548' }
                                     }}
                                 >
