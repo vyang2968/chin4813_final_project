@@ -280,7 +280,7 @@ export default function Home() {
                                     opacity: 0,
                                     transition: { duration: 0.8, delay: 0 } // Immediate exit
                                 }}
-                                transition={{ type: 'spring', damping: 20, stiffness: 60, delay: currentStage === 'intro' ? 3.6 : 2.5 }}
+                                transition={{ type: 'spring', stiffness: 100, damping: 25, restDelta: 0.01, delay: currentStage === 'intro' ? 3.6 : 2.5 }}
                                 style={{
                                     position: "absolute",
                                     top: "25%",
