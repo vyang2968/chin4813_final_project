@@ -107,13 +107,12 @@ export default function Home() {
         <main>
             <TableScene>
                 <AnimatePresence mode="wait">
-                    {/* Page 1: Tan Sheet Rectangle */}
                     {currentStage === 'menu' && (
                         <motion.div
                             key="intro-sheet"
                             initial={{ opacity: 0, y: 50 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -800, transition: { duration: 1, ease: 'easeInOut' } }} // Longer, higher for clear "floating away"
+                            exit={{ opacity: 0, y: -800, transition: { duration: 1, ease: 'easeInOut' } }}
                             style={{
                                 position: 'absolute',
                                 top: 0,
@@ -123,7 +122,7 @@ export default function Home() {
                                 zIndex: 10,
                                 display: 'flex',
                                 justifyContent: 'center',
-                                pointerEvents: 'none' // Ensure the wrapper doesn't block clicks (though inner Box will capture them)
+                                pointerEvents: 'none'
                             }}
                         >
                             <Box
@@ -131,17 +130,17 @@ export default function Home() {
                                     position: 'absolute',
                                     top: '15vh',
                                     width: 'min(90vw, 600px)',
-                                    bottom: '-10vh', // Extends off bottom
+                                    bottom: '-10vh',
                                     backgroundColor: '#e6ccb2',
                                     boxShadow: '0px 4px 20px rgba(0,0,0,0.3)',
-                                    transform: 'rotate(0deg)', // Ensure straight
+                                    transform: 'rotate(0deg)',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     padding: 4,
                                     textAlign: 'center',
-                                    pointerEvents: 'auto' // Re-enable pointer events for content
+                                    pointerEvents: 'auto'
                                 }}
                             >
                                 <Typography variant="h3" gutterBottom sx={{ fontFamily: 'serif', color: '#5d4037', fontWeight: 'bold' }}>
@@ -164,6 +163,69 @@ export default function Home() {
                                     }}
                                 >
                                     Begin Dinner
+                                </Button>
+                            </Box>
+                        </motion.div>
+                    )}
+
+                    {/* Closing Sheet */}
+                    {currentStage === 'closing' && (
+                        <motion.div
+                            key="closing-sheet"
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -800, transition: { duration: 1, ease: 'easeInOut' } }}
+                            transition={{ delay: 1.0, duration: 0.8 }} // Wait for Course 4 to exit
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                zIndex: 10,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                pointerEvents: 'none'
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: '15vh',
+                                    width: 'min(90vw, 600px)',
+                                    bottom: '-10vh',
+                                    backgroundColor: '#e6ccb2',
+                                    boxShadow: '0px 4px 20px rgba(0,0,0,0.3)',
+                                    transform: 'rotate(0deg)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: 4,
+                                    textAlign: 'center',
+                                    pointerEvents: 'auto'
+                                }}
+                            >
+                                <Typography variant="h3" gutterBottom sx={{ fontFamily: 'serif', color: '#5d4037', fontWeight: 'bold' }}>
+                                    Rest Well
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontFamily: 'serif', color: '#5d4037', mb: 4, maxWidth: '80%' }}>
+                                    {CLOSING_TEXT}
+                                </Typography>
+
+                                <Button
+                                    variant="contained"
+                                    onClick={() => handleNavigate('menu')}
+                                    sx={{
+                                        backgroundColor: '#5d4037',
+                                        color: 'white',
+                                        padding: '12px 36px',
+                                        fontSize: '1.2rem',
+                                        fontFamily: 'serif',
+                                        '&:hover': { backgroundColor: '#4e342e' }
+                                    }}
+                                >
+                                    Restart Experience
                                 </Button>
                             </Box>
                         </motion.div>
@@ -204,12 +266,13 @@ export default function Home() {
                 </AnimatePresence>
 
                 {/* Course View: Plate & InfoSheet */}
-                {/* Visible for Intro, Course 1-4, Closing */}
+                {/* Visible for Intro, Course 1-4. Not Menu, Not Closing */}
                 <AnimatePresence mode="wait">
-                    {currentStage !== 'menu' && (
+                    {!['menu', 'closing'].includes(currentStage) && (
                         <React.Fragment key={currentStage}>
                             {/* Plate */}
                             <motion.div
+                                key={`plate-${currentStage}`}
                                 initial={{ x: '-100vw', opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 exit={{
@@ -232,8 +295,8 @@ export default function Home() {
 
                             {/* InfoSheet */}
                             <InfoSheet
-                                title={currentStage === 'intro' ? 'Introduction' : (currentStage === 'closing' ? 'Closing' : currentDish?.name || '')}
-                                content={currentStage === 'intro' ? 'Scroll down to begin the first course.' : (currentStage === 'closing' ? CLOSING_TEXT : currentDish?.info || '')}
+                                title={currentStage === 'intro' ? 'Introduction' : (currentDish?.name || '')}
+                                content={currentStage === 'intro' ? 'Scroll down to begin the first course.' : (currentDish?.info || '')}
                                 isVisible={true}
                                 isIntro={currentStage === 'intro'}
                             />
