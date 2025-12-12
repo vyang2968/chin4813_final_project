@@ -351,7 +351,7 @@ export default function Home() {
                                 }}
                             >
                                 <Typography variant="h3" gutterBottom sx={{ fontFamily: 'serif', color: '#5d4037', fontWeight: 'bold' }}>
-                                    Rest Well
+                                    Thank You
                                 </Typography>
                                 <Typography variant="h6" sx={{ fontFamily: 'serif', color: '#5d4037', mb: 4, maxWidth: '80%' }}>
                                     {CLOSING_TEXT}
@@ -434,13 +434,13 @@ export default function Home() {
                                     height: "min(45vw, 500px)"
                                 }}
                             >
-                                <Plate dishImage={currentStage === 'intro' ? DISHES.course1?.image : (currentDish?.image || null)} />
+                                <Plate dishImage={currentDish?.image || null} />
                             </motion.div>
 
                             {/* InfoSheet */}
                             <InfoSheet
-                                title={currentStage === 'intro' ? 'Introduction' : (currentDish?.name || '')}
-                                content={currentStage === 'intro' ? 'Scroll down to begin the first course.' : (currentDish?.info || '')}
+                                title={(currentDish?.name || '')}
+                                content={(currentDish?.info || '')}
                                 isVisible={true}
                                 isIntro={currentStage === 'intro'}
                             />

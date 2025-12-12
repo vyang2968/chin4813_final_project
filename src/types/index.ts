@@ -6,7 +6,7 @@ export interface Dish {
   name: string;
   description: string;
   image: string; // path to asset
-  info: string; // The longer story
+  info: React.ReactNode;
 }
 
 export interface MenuItem {

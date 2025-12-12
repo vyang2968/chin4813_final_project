@@ -5,7 +5,7 @@ import { Box, Typography, Paper } from '@mui/material';
 
 interface InfoSheetProps {
   title: string;
-  content: string;
+  content: React.ReactNode;
   isVisible: boolean;
   isIntro?: boolean;
 }
